@@ -1,0 +1,34 @@
+{
+  "id": "?course=u25-no-injury",
+  "name": "5G Training - U25 No Injury",
+  "short_name": "U25 No Injury",
+  "description": "U25 injury-prevention training course",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "../?course=u25-no-injury",
+  "scope": "../",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f3f5f8",
+  "theme_color": "#f3f5f8",
+  "icons": [
+    {
+      "src": "../icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "../icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "../icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
