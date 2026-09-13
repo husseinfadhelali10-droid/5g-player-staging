@@ -60,6 +60,43 @@ function isCoreAsset(url) {
     /\/manifest\.webmanifest$/i.test(url.pathname);
 }
 
+async function cacheCourseAssets(data, client) {
+  const cache = await caches.open(COURSE_CACHE);
+  const urls = Array.isArray(data && data.urls) ? data.urls : [];
+  const validUrls = [];
+  const seen = new Set();
+
+  urls.forEach(function (value) {
+    try {
+      const url = new URL(String(value));
+      if (url.origin !== self.location.origin || !isCourseAsset(url) || seen.has(url.href)) return;
+      seen.add(url.href);
+      validUrls.push(url.href);
+    } catch (_) {}
+  });
+
+  const results = await Promise.allSettled(validUrls.map(async function (url) {
+    const cached = await cache.match(url);
+    if (cached) return true;
+    const response = await fetchClean(url);
+    await cache.put(url, response);
+    return true;
+  }));
+
+  const cached = results.filter(function (result) {
+    return result.status === "fulfilled" && result.value === true;
+  }).length;
+
+  if (client) {
+    client.postMessage({
+      type: "COURSE_ASSETS_CACHED",
+      courseId: String(data && data.courseId || ""),
+      total: validUrls.length,
+      cached: cached
+    });
+  }
+}
+
 async function networkFirst(request, cacheName, cacheKey) {
   const cache = await caches.open(cacheName);
   try {
@@ -134,4 +171,7 @@ self.addEventListener("fetch", function (event) {
 
 self.addEventListener("message", function (event) {
   if (event.data === "SKIP_WAITING") self.skipWaiting();
+  if (event.data && event.data.type === "CACHE_COURSE_ASSETS") {
+    event.waitUntil(cacheCourseAssets(event.data, event.source));
+  }
 });

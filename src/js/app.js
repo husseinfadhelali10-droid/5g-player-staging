@@ -29,6 +29,9 @@
   let bootFinished = false;
   let swRegistration = null;
   let rescueReloadStarted = false;
+  const courseAssetCachingRequested = new Set();
+  const offlineReadyNotified = new Set();
+  let pendingCourseAssetCaching = null;
 
   const StorageAdapter = (function () {
     const prefix = "5g:";
@@ -144,6 +147,73 @@
     $("toast").classList.remove("show");
   }
 
+  function collectCourseImageUrls(course) {
+    const urls = new Set();
+    if (!course || !Array.isArray(course.weeks)) return [];
+
+    course.weeks.forEach(function (week) {
+      if (!week || !Array.isArray(week.days)) return;
+      week.days.forEach(function (day) {
+        if (!day || !Array.isArray(day.exercises)) return;
+        day.exercises.forEach(function (exercise) {
+          if (!exercise || typeof exercise.image !== "string" || !exercise.image.trim()) return;
+          try {
+            const parsed = new URL(exercise.image.trim(), location.href);
+            if (parsed.origin === location.origin && /\/assets\/courses\//i.test(parsed.pathname)) {
+              urls.add(parsed.href);
+            }
+          } catch (_) {}
+        });
+      });
+    });
+
+    return Array.from(urls);
+  }
+
+  function postCourseAssetCaching(request) {
+    const controller = navigator.serviceWorker.controller;
+    if (!controller) {
+      pendingCourseAssetCaching = request;
+      return;
+    }
+    controller.postMessage({
+      type: "CACHE_COURSE_ASSETS",
+      courseId: request.courseId,
+      urls: request.urls
+    });
+  }
+
+  function requestCourseAssetCaching(courseId, urls) {
+    if (!("serviceWorker" in navigator)) return;
+    if (!Array.isArray(urls) || !urls.length) return;
+
+    const id = String(courseId || "").trim();
+    if (!id || courseAssetCachingRequested.has(id)) return;
+    courseAssetCachingRequested.add(id);
+
+    const request = { courseId: id, urls: urls.slice() };
+    if (navigator.serviceWorker.controller) postCourseAssetCaching(request);
+    else pendingCourseAssetCaching = request;
+  }
+
+  function flushPendingCourseAssetCaching() {
+    if (!("serviceWorker" in navigator) || !navigator.serviceWorker.controller || !pendingCourseAssetCaching) return;
+    const request = pendingCourseAssetCaching;
+    pendingCourseAssetCaching = null;
+    postCourseAssetCaching(request);
+  }
+
+  async function handleCourseAssetsCached(data) {
+    const courseId = String(data && data.courseId || "").trim();
+    if (!courseId || !COURSE || COURSE.id !== courseId || offlineReadyNotified.has(courseId)) return;
+    offlineReadyNotified.add(courseId);
+
+    const key = "offline-ready:" + courseId;
+    if (await StorageAdapter.get(key)) return;
+    await StorageAdapter.set(key, true);
+    if (COURSE && COURSE.id === courseId) showToast("الكورس جاهز للاستخدام بدون إنترنت");
+  }
+
   function setAuthenticatedHeader() {
     // Public PWA: no user/session controls are shown.
   }
@@ -208,6 +278,7 @@
     if (!course || !Array.isArray(course.weeks)) throw new Error("INVALID_COURSE_DATA");
 
     COURSE = course;
+    requestCourseAssetCaching(COURSE.id, collectCourseImageUrls(COURSE));
     await Progress.configure(PUBLIC_USER_ID, COURSE);
     await StorageAdapter.set(SELECTED_COURSE_KEY, COURSE.id);
     currentWeekId = Progress.get().weekId || (COURSE.weeks[0] ? COURSE.weeks[0].id : null);
@@ -670,12 +741,16 @@
       if (event.data && event.data.type === "SW_ACTIVATED" && isLoadingScreenActive()) {
         rescueReloadIfLoading();
       }
+      if (event.data && event.data.type === "COURSE_ASSETS_CACHED") {
+        handleCourseAssetsCached(event.data).catch(function () {});
+      }
     });
 
     window.addEventListener("load", function () {
       let hadController = Boolean(navigator.serviceWorker.controller);
 
       navigator.serviceWorker.addEventListener("controllerchange", function () {
+        flushPendingCourseAssetCaching();
         if (!hadController) {
           hadController = true;
           return;
@@ -685,6 +760,7 @@
 
       navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" }).then(function (registration) {
         swRegistration = registration;
+        flushPendingCourseAssetCaching();
         registration.update().catch(function () {});
         function skipWaitingWhenReady(worker) {
           if (!worker) return;
