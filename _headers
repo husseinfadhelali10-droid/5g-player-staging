@@ -1,0 +1,15 @@
+/
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  Service-Worker-Allowed: /
+
+/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/src/js/*
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/src/css/*
+  Cache-Control: no-cache, no-store, must-revalidate

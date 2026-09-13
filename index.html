@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f3f5f8">
+  <meta name="description" content="5G Training — الكورسات والتمارين التدريبية">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>5G Training</title>
+
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+  <link rel="stylesheet" href="./src/css/app.css">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="5G Training">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-in">
+      <button class="back-btn" id="backBtn" hidden aria-label="رجوع">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+
+      <div class="brand">
+        <img src="./icon-192.png" alt="5G Training" width="34" height="34">
+        <div>
+          <b>5G Training</b>
+          <small id="brandSub">الكورسات التدريبية</small>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <span class="net-dot" id="netDot" title="حالة الاتصال"></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="screen active" id="scr-loading" aria-live="polite">
+      <div class="loading-card">
+        <div>
+          <div class="spinner" aria-hidden="true"></div>
+          <p id="loadingMessage">جارٍ تحميل التطبيق…</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="scr-courses"></section>
+    <section class="screen" id="scr-home"></section>
+    <section class="screen" id="scr-days"></section>
+    <section class="screen" id="scr-day"></section>
+
+    <p class="footer">5G Training · <span id="verLbl">v3.4.1</span></p>
+  </main>
+
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <span class="lb-cap" id="lbCap"></span>
+    <button class="lb-x" id="lbX" aria-label="إغلاق">✕</button>
+    <img id="lbImg" alt="">
+    <span class="lb-hint">اضغط في أي مكان للإغلاق · قرّب بإصبعين للتكبير</span>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <span id="toastMsg"></span>
+    <button id="toastBtn" hidden type="button"></button>
+  </div>
+
+  <script src="./src/js/courses-data.js" defer></script>
+  <script src="./src/js/app.js" defer></script>
+</body>
+</html>
