@@ -1,5 +1,5 @@
 /* 5G Training — Public PWA shell and local course content. */
-const APP_VERSION = "preview-1789263512726";
+const APP_VERSION = "3.4.1-b4";
 const SHELL_CACHE = `5g-public-shell-${APP_VERSION}`;
 const COURSE_CACHE = `5g-public-course-assets-${APP_VERSION}`;
 const SHELL_URL = "./";

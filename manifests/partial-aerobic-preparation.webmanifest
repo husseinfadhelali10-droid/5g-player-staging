@@ -1,8 +1,8 @@
 {
   "id": "?course=partial-aerobic-preparation",
-  "name": "5G Training - Partial Aerobic Preparation",
-  "short_name": "Partial Aerobic",
-  "description": "Partial aerobic preparation training course",
+  "name": "5G Training - مرحلة الإعداد الهوائي الجزئي",
+  "short_name": "مرحلة الإعداد الهوائي الجزئي",
+  "description": "برنامج 4 أيام تدريبية",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "../?course=partial-aerobic-preparation",

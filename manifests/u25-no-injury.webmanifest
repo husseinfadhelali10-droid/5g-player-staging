@@ -1,8 +1,8 @@
 {
   "id": "?course=u25-no-injury",
-  "name": "5G Training - U25 No Injury",
-  "short_name": "U25 No Injury",
-  "description": "U25 injury-prevention training course",
+  "name": "5G Training - مرحلة الإعداد الأساسي",
+  "short_name": "مرحلة الإعداد الأساسي",
+  "description": "برنامج 4 أيام تدريبية",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "../?course=u25-no-injury",

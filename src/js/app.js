@@ -16,7 +16,7 @@
   const CHEV = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>';
   const PLAY = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>';
 
-  const APP_VERSION = "preview-1789263512726";
+  const APP_VERSION = "3.4.1-b4";
   const PUBLIC_USER_ID = "public-device";
   const SELECTED_COURSE_KEY = "selected-course";
   const SW_RELOAD_KEY = "sw-reloaded-" + APP_VERSION;
@@ -206,6 +206,9 @@
   async function handleCourseAssetsCached(data) {
     const courseId = String(data && data.courseId || "").trim();
     if (!courseId || !COURSE || COURSE.id !== courseId || offlineReadyNotified.has(courseId)) return;
+    const total = Number(data && data.total);
+    const cached = Number(data && data.cached);
+    if (!Number.isFinite(total) || !Number.isFinite(cached) || total <= 0 || cached < total) return;
     offlineReadyNotified.add(courseId);
 
     const key = "offline-ready:" + courseId;
