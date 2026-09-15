@@ -1,25 +1,14 @@
 (function () {
   "use strict";
 
-  function courseIdFromLocation() {
-    var params = new URLSearchParams(window.location.search);
-    var queryId = String(params.get("course") || "").trim();
-    if (queryId) return queryId;
-
-    var match = String(window.location.hash || "").match(/^#course\/([^/?#]+)$/);
-    if (!match) return "";
-    try {
-      return decodeURIComponent(match[1]).trim();
-    } catch (_) {
-      return "";
-    }
-  }
-
-  var courseId = courseIdFromLocation();
-  if (!/^[a-z0-9-]{3,40}$/i.test(courseId)) return;
+  var storageManifestBase =
+    "https://fukltjkgeagppfqjlali.supabase.co/storage/v1/object/public/course-content/manifests/";
+  var publicId = String(new URLSearchParams(window.location.search).get("course") || "").trim();
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(publicId)) return;
 
   var link = document.createElement("link");
   link.rel = "manifest";
-  link.href = "./manifests/" + encodeURIComponent(courseId) + ".webmanifest";
+  link.crossOrigin = "anonymous";
+  link.href = storageManifestBase + encodeURIComponent(publicId) + ".webmanifest";
   document.head.appendChild(link);
 })();
