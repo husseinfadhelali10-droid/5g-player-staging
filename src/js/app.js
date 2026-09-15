@@ -19,6 +19,11 @@
   const APP_VERSION = "3.4.1-b4";
   const PUBLIC_USER_ID = "public-device";
   const SELECTED_COURSE_KEY = "selected-course";
+  // GO-1 STAGING SHIM — remove before/at Phase 3 Supabase Player runtime migration.
+  const GO1_UUID_COURSE_ALIAS = Object.freeze({
+    "5d55c872-24dd-4b11-af5e-ee7667c2cdae": "u25-no-injury",
+    "7857df86-b96d-4a3e-9710-34f9a35fcaf5": "partial-aerobic-preparation"
+  });
   const SW_RELOAD_KEY = "sw-reloaded-" + APP_VERSION;
   let myCourses = [];
   let COURSE = null;
@@ -257,18 +262,19 @@
     renderRouteMessage("افتح رابط الكورس الخاص بك للمتابعة", "لا توجد قائمة كورسات عامة في هذا التطبيق.");
   }
 
-  async function loadCourse(courseId) {
+  async function loadCourse(routeCourseId) {
     if (routeBusy) return;
     routeBusy = true;
     showLoading("جارٍ فتح الكورس…");
     try {
-      const selected = courseById(courseId);
+      const localLookupId = GO1_UUID_COURSE_ALIAS[routeCourseId] || routeCourseId;
+      const selected = courseById(localLookupId);
       if (!selected || !selected.course) {
         COURSE = null;
         renderRouteMessage("هذا الكورس غير متاح أو الرابط غير صحيح", "تحقق من رابط الكورس ثم حاول مرة أخرى.");
         return;
       }
-      await openCourseData(selected.course);
+      await openCourseData(selected.course, routeCourseId);
     } catch (_) {
       COURSE = null;
       renderRouteMessage("تعذر فتح الكورس", "تحقق من الاتصال ثم أعد المحاولة.", true);
@@ -277,7 +283,7 @@
     }
   }
 
-  async function openCourseData(course) {
+  async function openCourseData(course, canonicalRouteId) {
     if (!course || !Array.isArray(course.weeks)) throw new Error("INVALID_COURSE_DATA");
 
     COURSE = course;
@@ -291,9 +297,10 @@
     }
 
     const canonicalUrl = new URL(window.location.href);
-    canonicalUrl.searchParams.set("course", COURSE.id);
+    const routeId = canonicalRouteId || COURSE.id;
+    canonicalUrl.searchParams.set("course", routeId);
     canonicalUrl.hash = "";
-    history.replaceState({ courseId: COURSE.id }, "", canonicalUrl.pathname + canonicalUrl.search);
+    history.replaceState({ courseId: routeId }, "", canonicalUrl.pathname + canonicalUrl.search);
     showCourseScreen("home");
   }
 
